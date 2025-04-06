@@ -134,6 +134,12 @@ fn main() -> Result<(), String> {
 
         let move_speed = frame_time * 5.0;
         let rot_speed = frame_time * 3.0;
+ 
+        let pressed_keys: HashSet<_> = event_pump
+            .keyboard_state()
+            .pressed_scancodes()
+            .filter_map(Keycode::from_scancode)
+            .collect();
 
         for event in event_pump.poll_iter() {
             match event {
@@ -142,10 +148,11 @@ fn main() -> Result<(), String> {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'main,
-                Event::KeyDown {
-                    keycode: Some(Keycode::UP),
-                    ..
-                } => {
+                _ => {}
+            }
+        }
+ 
+        if pressed_keys.contains(&Keycode::W) || pressed_keys.contains(&Keycode::UP) {
                     if WORLD_MAP[(pos_x + dir_x * move_speed) as usize][pos_y as usize] == 0 {
                         pos_x += dir_x * move_speed;
                     }
@@ -153,21 +160,8 @@ fn main() -> Result<(), String> {
                         pos_y += dir_y * move_speed;
                     }
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::LEFT),
-                    ..
-                } => {
-                    let old_dir_x = dir_x;
-                    dir_x = dir_x * (rot_speed).cos() - dir_y * (rot_speed).sin();
-                    dir_y = old_dir_x * (rot_speed).sin() + dir_y * (rot_speed).cos();
-                    let old_plane_x = plane_x;
-                    plane_x = plane_x * (rot_speed).cos() - plane_y * (rot_speed).sin();
-                    plane_y = old_plane_x * (rot_speed).sin() + plane_y * (rot_speed).cos();
-                }
-                Event::KeyDown {
-                    keycode: Some(Keycode::DOWN),
-                    ..
-                } => {
+ 
+        if pressed_keys.contains(&Keycode::S) || pressed_keys.contains(&Keycode::DOWN) {
                     if WORLD_MAP[(pos_x - dir_x * move_speed) as usize][pos_y as usize] == 0 {
                         pos_x -= dir_x * move_speed;
                     }
@@ -175,10 +169,17 @@ fn main() -> Result<(), String> {
                         pos_y -= dir_y * move_speed;
                     }
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::RIGHT),
-                    ..
-                } => {
+
+        if pressed_keys.contains(&Keycode::A) || pressed_keys.contains(&Keycode::LEFT) {
+            let old_dir_x = dir_x;
+            dir_x = dir_x * rot_speed.cos() - dir_y * rot_speed.sin();
+            dir_y = old_dir_x * rot_speed.sin() + dir_y * rot_speed.cos();
+            let old_plane_x = plane_x;
+            plane_x = plane_x * rot_speed.cos() - plane_y * rot_speed.sin();
+            plane_y = old_plane_x * rot_speed.sin() + plane_y * rot_speed.cos();
+        }
+ 
+        if pressed_keys.contains(&Keycode::D) || pressed_keys.contains(&Keycode::RIGHT) {
                     let old_dir_x = dir_x;
                     dir_x = dir_x * (-rot_speed).cos() - dir_y * (-rot_speed).sin();
                     dir_y = old_dir_x * (-rot_speed).sin() + dir_y * (-rot_speed).cos();
